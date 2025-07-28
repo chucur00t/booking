@@ -64,11 +64,11 @@
                  <footer class="p-4 border-t border-blue-700"><button id="logout-btn-user" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200">Logout</button></footer>
             </aside>
             <div id="user-main-content" class="flex-1 flex flex-col">
-                <header class="bg-white shadow-sm p-4 flex items-center md:hidden">
-                    <button id="user-menu-btn" class="text-gray-600 hover:text-gray-900">
-                        <span class="h-6 w-6 hero-icon" data-icon="bars-3"></span>
+                <header class="bg-white shadow-sm p-4 flex items-center md:hidden relative">
+                    <button id="user-menu-btn" class="text-gray-600 hover:text-gray-900 z-10">
+                        <span class="h-6 w-6 block hero-icon" data-icon="bars-3"></span>
                     </button>
-                    <h1 class="text-lg font-semibold text-gray-800 ml-4">Aplikasi Ruangan</h1>
+                    <h1 class="text-lg font-semibold text-gray-800 absolute inset-0 flex items-center justify-center">Aplikasi Ruangan</h1>
                 </header>
                 <main class="flex-1 p-4 sm:p-6 lg:p-8 overflow-auto">
                     <div id="page-user-daftar" class="page"></div>
@@ -90,11 +90,11 @@
                 <footer class="p-4 border-t border-gray-700"><button id="logout-btn-admin" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200">Logout</button></footer>
             </aside>
             <div id="admin-main-content" class="flex-1 flex flex-col">
-                <header class="bg-white shadow-sm p-4 flex items-center md:hidden">
-                     <button id="admin-menu-btn" class="text-gray-600 hover:text-gray-900">
-                        <span class="h-6 w-6 hero-icon" data-icon="bars-3"></span>
+                <header class="bg-white shadow-sm p-4 flex items-center md:hidden relative">
+                     <button id="admin-menu-btn" class="text-gray-600 hover:text-gray-900 z-10">
+                        <span class="h-6 w-6 block hero-icon" data-icon="bars-3"></span>
                     </button>
-                    <h1 class="text-lg font-semibold text-gray-800 ml-4">Admin Panel</h1>
+                    <h1 class="text-lg font-semibold text-gray-800 absolute inset-0 flex items-center justify-center">Admin Panel</h1>
                 </header>
                 <main class="flex-1 p-4 sm:p-6 lg:p-8 overflow-auto">
                     <div id="page-admin-dashboard" class="page"></div>
@@ -293,19 +293,28 @@ document.addEventListener('DOMContentLoaded', () => {
         const container = document.getElementById('page-user-riwayat');
         if (!container) return;
         const myBookings = bookingsData.filter(b => b.userId === currentUser.id).sort((a, b) => new Date(b.date) - new Date(a.date));
-        let tableBodyHTML = '';
+        let listHTML = '';
         if (myBookings.length === 0) {
-            tableBodyHTML = '<tr><td colspan="5" class="text-center p-6 text-gray-500">Anda belum memiliki riwayat booking.</td></tr>';
+            listHTML = '<div class="text-center p-6 text-gray-500 bg-white rounded-lg shadow-md">Anda belum memiliki riwayat booking.</div>';
         } else {
-            myBookings.forEach(booking => {
+            listHTML = myBookings.map(booking => {
                 const room = roomsData.find(r => r.id === booking.roomId);
                 const status = getBookingStatus(booking);
-                tableBodyHTML += `<tr class="border-b hover:bg-gray-50 transition-colors duration-200"><td class="p-4 font-medium text-gray-800">${room.name}</td><td class="p-4 text-gray-600">${booking.activity}</td><td class="p-4 text-gray-600">${new Date(booking.date).toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'})}</td><td class="p-4 text-gray-600">${booking.start} - ${booking.end}</td><td class="p-4"><span class="px-3 py-1 text-xs font-semibold rounded-full ${status.class}">${status.text}</span></td></tr>`;
-            });
+                return `
+                <div class="bg-white p-4 rounded-lg shadow-md mb-4 flex flex-col sm:flex-row sm:justify-between sm:items-center">
+                    <div class="flex-grow mb-4 sm:mb-0">
+                        <p class="font-bold text-gray-800">${room.name}</p>
+                        <p class="text-sm text-gray-600">${booking.activity}</p>
+                        <p class="text-sm text-gray-500 mt-1">${new Date(booking.date).toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'})} | ${booking.start} - ${booking.end}</p>
+                    </div>
+                    <div class="flex-shrink-0">
+                        <span class="px-3 py-1 text-xs font-semibold rounded-full ${status.class}">${status.text}</span>
+                    </div>
+                </div>
+                `;
+            }).join('');
         }
-        container.innerHTML = `<h1 class="text-2xl lg:text-3xl font-bold mb-6 text-gray-800">Riwayat Booking Saya</h1><div class="bg-white rounded-lg shadow-lg"><div class="overflow-x-auto rounded-lg"><table class="w-full text-sm text-left">
-            <thead class="bg-gray-50 text-xs text-gray-700 uppercase"><tr><th class="p-4">Ruangan</th><th class="p-4">Kegiatan</th><th class="p-4">Tanggal</th><th class="p-4">Waktu</th><th class="p-4">Status</th></tr></thead>
-            <tbody>${tableBodyHTML}</tbody></table></div></div>`;
+        container.innerHTML = `<h1 class="text-2xl lg:text-3xl font-bold mb-6 text-gray-800">Riwayat Booking Saya</h1><div>${listHTML}</div>`;
     }
 
     function renderUserNotifikasiPage() {
@@ -334,7 +343,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const pendingClass = pendingBookings > 0 ? 'text-orange-500 animate-pulse' : 'text-orange-500';
 
         container.innerHTML = `<h1 class="text-2xl lg:text-3xl font-bold mb-6 text-gray-800">Dashboard</h1>
-            <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div class="bg-white p-6 rounded-xl shadow-lg text-center transition-all duration-300 hover:shadow-xl hover:-translate-y-1"><h2 class="text-5xl font-extrabold text-blue-600">${totalRooms}</h2><p class="text-gray-500 font-medium mt-2">Total Ruangan</p></div>
                 <div class="bg-white p-6 rounded-xl shadow-lg text-center transition-all duration-300 hover:shadow-xl hover:-translate-y-1"><h2 class="text-5xl font-extrabold text-green-600">${totalBookings}</h2><p class="text-gray-500 font-medium mt-2">Booking Disetujui</p></div>
                 <div class="bg-white p-6 rounded-xl shadow-lg text-center transition-all duration-300 hover:shadow-xl hover:-translate-y-1"><h2 class="text-5xl font-extrabold ${pendingClass}">${pendingBookings}</h2><p class="text-gray-500 font-medium mt-2">Menunggu Persetujuan</p></div>
@@ -344,67 +353,81 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderAdminManageRooms() {
         const container = document.getElementById('page-admin-manage-rooms');
         if (!container) return;
-        let tableBodyHTML = roomsData.map(room => `
-            <tr class="border-b hover:bg-gray-50 transition-colors duration-200">
-                <td class="p-4 font-medium text-gray-800">${room.name}</td>
-                <td class="p-4 text-gray-600">${room.type}</td><td class="p-4 text-gray-600">${room.capacity}</td>
-                <td class="p-4 text-gray-600 text-xs">${room.facilities}</td>
-                <td class="p-4 space-x-2 whitespace-nowrap">
+        let listHTML = roomsData.map(room => `
+             <div class="bg-white p-4 rounded-lg shadow-md mb-4 flex flex-col lg:flex-row lg:items-center lg:justify-between">
+                <div class="w-full lg:w-1/4 mb-2 lg:mb-0">
+                    <p class="font-bold text-gray-800">${room.name}</p>
+                    <p class="text-sm text-gray-500 lg:hidden">${room.type} | Kap. ${room.capacity}</p>
+                </div>
+                <div class="hidden lg:block lg:w-1/5"><p class="text-gray-600">${room.type}</p></div>
+                <div class="hidden lg:block lg:w-1/12"><p class="text-gray-600">${room.capacity}</p></div>
+                <div class="w-full lg:w-1/3 mb-4 lg:mb-0"><p class="text-sm text-gray-500">${room.facilities}</p></div>
+                <div class="w-full lg:w-auto flex items-center space-x-2">
                     <button data-room-id="${room.id}" class="edit-room-btn bg-yellow-500 text-white px-3 py-1 text-sm rounded-md hover:bg-yellow-600 transition-colors">Edit</button>
-                    <button data-room-id="${room.id}" class="delete-room-btn bg-red-600 text-white px-3 py-1 text-sm rounded-md hover:bg-red-600 transition-colors">Hapus</button>
-                </td></tr>`).join('');
+                    <button data-room-id="${room.id}" class="delete-room-btn bg-red-600 text-white px-3 py-1 text-sm rounded-md hover:bg-red-700 transition-colors">Hapus</button>
+                </div>
+            </div>
+            `).join('');
+
+        const headerHTML = `
+            <div class="hidden lg:flex flex-row items-center justify-between text-left text-xs text-gray-500 uppercase font-semibold px-4 pb-2 border-b">
+                <div class="w-1/4">Nama</div>
+                <div class="w-1/5">Tipe</div>
+                <div class="w-1/12">Kap.</div>
+                <div class="w-1/3">Fasilitas</div>
+                <div class="w-auto text-right">Aksi</div>
+            </div>`;
+
         container.innerHTML = `<header class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
                 <h1 class="text-2xl lg:text-3xl font-bold text-gray-800">Manajemen Ruangan</h1>
                 <button class="add-room-btn bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors shadow-md hover:shadow-lg">Tambah Ruangan</button>
             </header>
-            <div class="bg-white rounded-lg shadow-lg"><div class="overflow-x-auto rounded-lg"><table class="w-full text-sm text-left">
-                <thead class="bg-gray-50 text-xs text-gray-700 uppercase"><tr><th class="p-4">Nama</th><th class="p-4">Tipe</th><th class="p-4">Kap.</th><th class="p-4">Fasilitas</th><th class="p-4">Aksi</th></tr></thead>
-                <tbody>${tableBodyHTML}</tbody></table></div></div>`;
+            <div>${headerHTML}${listHTML}</div>`;
     }
 
     function renderAdminAllBookings() {
         const container = document.getElementById('page-admin-all-bookings');
         if (!container) return;
         const statusOrder = { "Menunggu Persetujuan": 1, "Disetujui": 2, "Ditolak": 3, "Selesai": 4 };
-        const allBookings = [...bookingsData].sort((a, b) => statusOrder[a.status] - statusOrder[b.status] || new Date(b.date) - new Date(a.date));
+        const allBookings = [...bookingsData].sort((a, b) => statusOrder[getBookingStatus(a).text] - statusOrder[getBookingStatus(b).text] || new Date(b.date) - new Date(a.date));
         
-        let tableBodyHTML = allBookings.map(booking => {
+        let listHTML = allBookings.map(booking => {
             const room = roomsData.find(r => r.id === booking.roomId);
             const user = usersData.find(u => u.id === booking.userId);
             const status = getBookingStatus(booking);
             let actionButtons = '';
 
-            if (booking.status === 'Menunggu Persetujuan') {
+            if (status.text === 'Menunggu Persetujuan') {
                 actionButtons = `
-                    <button data-booking-id="${booking.id}" class="approve-booking-btn bg-green-500 text-white p-1 rounded-md hover:bg-green-600 transition-colors flex items-center justify-center" title="Setujui"><span class="h-3 w-3 hero-icon" data-icon="check"></span></button>
-                    <button data-booking-id="${booking.id}" class="reject-booking-btn bg-red-500 text-white p-1 rounded-md hover:bg-red-600 transition-colors flex items-center justify-center" title="Tolak"><span class="h-3 w-3 hero-icon" data-icon="x-mark"></span></button>
+                    <button data-booking-id="${booking.id}" class="approve-booking-btn bg-green-500 text-white p-1 rounded-md hover:bg-green-600 transition-colors flex items-center justify-center" title="Setujui"><span class="h-4 w-4 hero-icon" data-icon="check"></span></button>
+                    <button data-booking-id="${booking.id}" class="reject-booking-btn bg-red-500 text-white p-1 rounded-md hover:bg-red-600 transition-colors flex items-center justify-center" title="Tolak"><span class="h-4 w-4 hero-icon" data-icon="x-mark"></span></button>
                 `;
-            } else if (booking.status === 'Disetujui') {
-                actionButtons = `<button data-booking-id="${booking.id}" class="cancel-booking-btn bg-gray-500 text-white p-1 rounded-md hover:bg-gray-600 transition-colors flex items-center justify-center" title="Batalkan"><span class="h-3 w-3 hero-icon" data-icon="trash"></span></button>`;
+            } else if (status.text === 'Disetujui') {
+                actionButtons = `<button data-booking-id="${booking.id}" class="cancel-booking-btn bg-gray-500 text-white p-1 rounded-md hover:bg-gray-600 transition-colors flex items-center justify-center" title="Batalkan"><span class="h-4 w-4 hero-icon" data-icon="trash"></span></button>`;
             }
 
-            return `<tr class="border-b hover:bg-gray-50 transition-colors duration-200">
-                        <td class="p-4 font-medium text-gray-800">${room.name}</td>
-                        <td class="p-4 text-gray-600">${booking.activity}</td>
-                        <td class="p-4 text-gray-600">${user.name}</td>
-                        <td class="p-4 text-gray-600">${new Date(booking.date).toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'})}</td>
-                        <td class="p-4"><span class="px-3 py-1 text-xs font-semibold rounded-full ${status.class}">${status.text}</span></td>
-                        <td class="p-4">
-                            <div class="flex items-center space-x-2">
-                                ${actionButtons}
-                            </div>
-                        </td>
-                    </tr>`;
+            return `
+                <div class="bg-white p-4 rounded-lg shadow-md mb-4 flex flex-col md:flex-row md:items-center md:flex-wrap">
+                    <!-- Kolom utama -->
+                    <div class="flex-grow w-full md:w-2/5 mb-2 md:mb-0 md:pr-4">
+                        <p class="font-bold text-gray-800">${room.name}</p>
+                        <p class="text-sm text-gray-600">${booking.activity}</p>
+                    </div>
+                    <!-- Kolom detail -->
+                    <div class="w-full md:w-3/5 flex flex-row items-center justify-between">
+                         <div class="text-left">
+                            <p class="text-sm text-gray-700">${user.name}</p>
+                            <p class="text-xs text-gray-500">${new Date(booking.date).toLocaleDateString('id-ID', {day: 'numeric', month: 'short', year: 'numeric'})}</p>
+                         </div>
+                         <div><span class="px-3 py-1 text-xs font-semibold rounded-full ${status.class}">${status.text}</span></div>
+                         <div class="flex items-center space-x-2">${actionButtons}</div>
+                    </div>
+                </div>
+                `;
         }).join('');
         
-        container.innerHTML = `<h1 class="text-2xl lg:text-3xl font-bold mb-6 text-gray-800">Semua Riwayat Booking</h1>
-            <div class="bg-white rounded-lg shadow-lg"><div class="overflow-x-auto rounded-lg"><table class="w-full text-sm text-left">
-                <thead class="bg-gray-50 text-xs text-gray-700 uppercase">
-                    <tr><th class="p-4">Ruangan</th><th class="p-4">Kegiatan</th><th class="p-4">Dipesan Oleh</th><th class="p-4">Tanggal</th><th class="p-4">Status</th><th class="p-4">Aksi</th></tr>
-                </thead>
-                <tbody id="all-bookings-table-body">${tableBodyHTML}</tbody></table></div></div>`;
-        
-        initIcons(); // Re-initialize icons for new buttons
+        container.innerHTML = `<h1 class="text-2xl lg:text-3xl font-bold mb-6 text-gray-800">Semua Riwayat Booking</h1><div>${listHTML}</div>`;
+        initIcons();
     }
     
     // --- Modal Functions ---
@@ -414,7 +437,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const modal = document.getElementById('booking-modal');
         const modalContent = modal.querySelector('.modal-content');
         const minDate = new Date();
-        minDate.setDate(minDate.getDate() + 1); // Minimum booking is tomorrow
+        minDate.setDate(minDate.getDate() + 1);
         const minDateString = minDate.toISOString().split('T')[0];
 
         modalContent.innerHTML = `
@@ -554,14 +577,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const bookingIndex = bookingsData.findIndex(b => b.id === bookingId);
         if (bookingIndex === -1) return;
         
+        const oldStatus = bookingsData[bookingIndex].status;
         bookingsData[bookingIndex].status = newStatus;
         const booking = bookingsData[bookingIndex];
         const room = roomsData.find(r => r.id === booking.roomId);
 
-        if (newStatus === 'Disetujui') {
+        if (newStatus === 'Disetujui' && oldStatus !== 'Disetujui') {
              createNotification(booking.userId, `Booking Anda untuk "${booking.activity}" di ${room.name} telah disetujui.`);
              showCustomAlert('Berhasil!', `Booking telah disetujui.`);
-        } else if (newStatus === 'Ditolak') {
+        } else if (newStatus === 'Ditolak' && oldStatus !== 'Ditolak') {
             createNotification(booking.userId, `Booking Anda untuk "${booking.activity}" di ${room.name} ditolak.`);
             showCustomAlert('Berhasil!', `Booking telah ditolak.`);
         }
