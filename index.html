@@ -64,6 +64,22 @@
             color: white;
             font-weight: 600;
         }
+        .star-rating {
+            display: flex;
+            flex-direction: row-reverse;
+            justify-content: center;
+        }
+        .star-rating label {
+            cursor: pointer;
+            color: #d1d5db; /* gray-300 */
+            transition: color 0.2s;
+        }
+        .star-rating input:checked ~ label,
+        .star-rating label:hover,
+        .star-rating label:hover ~ label {
+            color: #f59e0b; /* amber-500 */
+        }
+        .star-rating input { display: none; }
     </style>
 </head>
 <body class="bg-gray-100 antialiased">
@@ -100,7 +116,13 @@
                     <a href="#notifikasi" class="sidebar-item flex items-center px-4 py-3 hover:bg-blue-800 rounded-lg transition-colors duration-200 cursor-pointer"><span class="h-6 w-6 mr-3 hero-icon" data-icon="bell"></span>Notifikasi</a>
                     <a href="#flowchart" class="sidebar-item flex items-center px-4 py-3 hover:bg-blue-800 rounded-lg transition-colors duration-200 cursor-pointer"><span class="h-6 w-6 mr-3 hero-icon" data-icon="information-circle"></span>Proses Bisnis</a>
                 </nav>
-                 <footer class="p-4 border-t border-blue-700"><button id="logout-btn-user" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200">Logout</button></footer>
+                 <footer class="p-4 border-t border-blue-700">
+                    <a href="https://wa.me/6281510599991" target="_blank" class="flex items-center justify-center w-full text-sm text-blue-200 hover:text-white mb-4 transition-colors duration-200">
+                        <span class="h-5 w-5 mr-2 hero-icon" data-icon="chat-bubble-left-ellipsis"></span>
+                        Dukungan WhatsApp
+                    </a>
+                    <button id="logout-btn-user" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200">Logout</button>
+                </footer>
             </aside>
             <div id="user-main-content" class="flex-1 flex flex-col">
                 <header class="bg-white shadow-sm p-4 flex items-center md:hidden relative">
@@ -128,9 +150,16 @@
                     <a href="#schedule" class="admin-sidebar-item flex items-center px-4 py-3 hover:bg-gray-700 rounded-lg transition-colors duration-200 cursor-pointer"><span class="h-6 w-6 mr-3 hero-icon" data-icon="calendar-days"></span>Jadwal Ruangan</a>
                     <a href="#all-bookings" class="admin-sidebar-item flex items-center px-4 py-3 hover:bg-gray-700 rounded-lg transition-colors duration-200 cursor-pointer"><span class="h-6 w-6 mr-3 hero-icon" data-icon="clipboard-document-list"></span>Manajemen Pesanan</a>
                     <a href="#manage-rooms" class="admin-sidebar-item flex items-center px-4 py-3 hover:bg-gray-700 rounded-lg transition-colors duration-200 cursor-pointer"><span class="h-6 w-6 mr-3 hero-icon" data-icon="building-office-2"></span>Manajemen Ruangan</a>
+                    <a href="#feedback" class="admin-sidebar-item flex items-center px-4 py-3 hover:bg-gray-700 rounded-lg transition-colors duration-200 cursor-pointer"><span class="h-6 w-6 mr-3 hero-icon" data-icon="chat-bubble-left-ellipsis"></span>Feedback Pengguna</a>
                     <a href="#flowchart" class="admin-sidebar-item flex items-center px-4 py-3 hover:bg-gray-700 rounded-lg transition-colors duration-200 cursor-pointer"><span class="h-6 w-6 mr-3 hero-icon" data-icon="information-circle"></span>Proses Bisnis</a>
                 </nav>
-                <footer class="p-4 border-t border-gray-700"><button id="logout-btn-admin" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200">Logout</button></footer>
+                <footer class="p-4 border-t border-gray-700">
+                    <a href="https://wa.me/6281510599991" target="_blank" class="flex items-center justify-center w-full text-sm text-gray-300 hover:text-white mb-4 transition-colors duration-200">
+                        <span class="h-5 w-5 mr-2 hero-icon" data-icon="chat-bubble-left-ellipsis"></span>
+                        Dukungan WhatsApp
+                    </a>
+                    <button id="logout-btn-admin" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200">Logout</button>
+                </footer>
             </aside>
             <div id="admin-main-content" class="flex-1 flex flex-col">
                 <header class="bg-white shadow-sm p-4 flex items-center md:hidden relative">
@@ -145,6 +174,7 @@
                     <div id="page-admin-schedule" class="page"></div>
                     <div id="page-admin-manage-rooms" class="page"></div>
                     <div id="page-admin-all-bookings" class="page"></div>
+                    <div id="page-admin-feedback" class="page"></div>
                     <div id="page-admin-flowchart" class="page"></div>
                 </main>
             </div>
@@ -157,6 +187,9 @@
         <div class="modal-content bg-white rounded-lg shadow-xl p-6 sm:p-8 max-w-lg w-full"></div>
     </div>
     <div id="room-modal" class="modal fixed inset-0 bg-black bg-opacity-50 z-40 hidden items-center justify-center p-4">
+        <div class="modal-content bg-white rounded-lg shadow-xl p-6 sm:p-8 max-w-lg w-full"></div>
+    </div>
+     <div id="feedback-modal" class="modal fixed inset-0 bg-black bg-opacity-50 z-40 hidden items-center justify-center p-4">
         <div class="modal-content bg-white rounded-lg shadow-xl p-6 sm:p-8 max-w-lg w-full"></div>
     </div>
     <div id="alert-modal" class="modal fixed inset-0 bg-black bg-opacity-60 z-50 hidden items-center justify-center p-4">
@@ -247,6 +280,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     let bookingsData = generateDummyBookings();
+    let feedbackData = [
+        { bookingId: 'b004', rating: 5, comment: 'Sesi webinar berjalan lancar, koneksi stabil.'},
+        { bookingId: 'b005', rating: 4, comment: 'AC di ruangan agak terlalu dingin, tapi secara keseluruhan fasilitasnya bagus.'}
+    ];
     let notificationsData = [ { userId: 'user01', message: 'Pesanan Anda untuk Ruang Garuda (29 Juli 2025) telah dikonfirmasi.', time: '1 jam yang lalu', read: false }, { userId: 'admin01', message: 'Rapat "Dewan Direksi" akan dimulai dalam 1 jam.', time: '2 jam yang lalu', read: false }, { userId: 'user02', message: 'Pesanan untuk "Pelatihan Internal Batch 1" telah selesai.', time: '3 hari yang lalu', read: true }, { userId: 'all', message: 'Maintenance sistem akan dilakukan pada hari Sabtu.', time: '2 hari yang lalu', read: false }, ];
     let currentUser = null; 
     let scheduleRoomFilter = 'all'; 
@@ -288,7 +325,9 @@ document.addEventListener('DOMContentLoaded', () => {
         'document-duplicate': '<path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 0 1-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 0 1 1.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 0 0-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 0 1-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 0 0-3.375-3.375h-1.5a1.125 1.125 0 0 1-1.125-1.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H9.75" />',
         'arrow-trending-up': '<path stroke-linecap="round" stroke-linejoin="round" d="m2.25 18 9-9 4.5 4.5L21.75 6" />',
         'check-badge': '<path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 0 1-1.043 3.296 3.745 3.745 0 0 1-3.296 1.043A3.745 3.745 0 0 1 12 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 0 1-3.296-1.043 3.745 3.745 0 0 1-1.043-3.296A3.745 3.745 0 0 1 3 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 0 1 1.043-3.296 3.746 3.746 0 0 1 3.296-1.043A3.746 3.746 0 0 1 12 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 0 1 3.296 1.043 3.746 3.746 0 0 1 1.043 3.296A3.745 3.745 0 0 1 21 12Z" />',
-        'star': '<path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.32 1.011l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 21.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .32-1.011l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z" />'
+        'star': '<path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.32 1.011l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 21.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .32-1.011l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z" />',
+        'star-solid': '<path fill="currentColor" d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.32 1.011l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 21.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .32-1.011l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z" />',
+        'chat-bubble-left-ellipsis': '<path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.76 9.76 0 0 1-2.53-.388A5.887 5.887 0 0 0 5.25 21.75l-2.53-.388A9.76 9.76 0 0 1 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25Z" />'
     };
     
     // =================================================================
@@ -353,6 +392,54 @@ document.addEventListener('DOMContentLoaded', () => {
              sidebarOverlay.classList.add('hidden');
         }
     }
+    
+    function renderAdminFeedbackPage() {
+        const container = document.getElementById('page-admin-feedback');
+        if (!container) return;
+
+        if (feedbackData.length === 0) {
+            container.innerHTML = renderEmptyState(
+                'Belum Ada Feedback',
+                'Belum ada masukan dari pengguna.',
+                'chat-bubble-left-ellipsis'
+            );
+            initIcons();
+            return;
+        }
+
+        const listItemsHTML = feedbackData.map(f => {
+            const booking = bookingsData.find(b => b.id === f.bookingId) || {};
+            const room = roomsData.find(r => r.id === booking.roomId) || {};
+            const user = usersData.find(u => u.id === booking.userId) || {};
+            const date = booking.date ? new Date(booking.date).toLocaleDateString('id-ID', {
+                day: 'numeric', month: 'long', year: 'numeric'
+            }) : '-';
+
+            const stars = Array.from({ length: 5 }, (_, i) => `
+                <span class="h-5 w-5 hero-icon ${i < f.rating ? 'text-amber-400' : 'text-gray-300'}" data-icon="star-solid"></span>
+            `).join('');
+
+            return `
+            <div class="bg-white p-4 rounded-lg shadow-md mb-4">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <p class="font-bold text-gray-800">${room.name || 'Ruangan Dihapus'}</p>
+                        <p class="text-sm text-gray-600">${booking.activity || 'Aktivitas Tidak Diketahui'}</p>
+                        <p class="text-xs text-gray-500 mt-1">Oleh: ${user.name || 'Pengguna Tidak Diketahui'} pada ${date}</p>
+                    </div>
+                    <div class="flex items-center space-x-1">${stars}</div>
+                </div>
+                <p class="mt-3 text-gray-700 text-sm italic border-l-4 border-gray-200 pl-4">"${f.comment}"</p>
+            </div>`;
+        }).join('');
+
+        container.innerHTML = `
+            <h1 class="text-2xl lg:text-3xl font-bold mb-6 text-gray-800">Feedback Pengguna</h1>
+            <div>${listItemsHTML}</div>
+        `;
+        initIcons();
+    }
+
 
     /** Renders all content based on the current user's role. */
     function renderAll() {
@@ -369,6 +456,7 @@ document.addEventListener('DOMContentLoaded', () => {
             renderAdminSchedulePage(TODAY_DATE.toISOString().split('T')[0], scheduleRoomFilter);
             renderAdminManageRooms();
             renderAdminAllBookings();
+            renderAdminFeedbackPage();
             renderFlowchartPage('admin');
             navigate('admin', 'dashboard');
         }
@@ -435,6 +523,12 @@ document.addEventListener('DOMContentLoaded', () => {
             listHTML = myBookings.map(booking => {
                 const room = roomsData.find(r => r.id === booking.roomId);
                 const status = getBookingStatus(booking);
+                const hasFeedback = feedbackData.some(f => f.bookingId === booking.id);
+                let feedbackButton = '';
+                if (status.text === 'Selesai' && !hasFeedback) {
+                    feedbackButton = `<button data-booking-id="${booking.id}" class="open-feedback-modal-btn mt-2 sm:mt-0 sm:ml-4 text-sm bg-blue-100 text-blue-700 font-semibold py-1 px-3 rounded-md hover:bg-blue-200 transition-colors">Beri Penilaian</button>`;
+                }
+
                 return `
                 <div class="bg-white p-4 rounded-lg shadow-md mb-4 flex flex-col sm:flex-row sm:justify-between sm:items-center">
                     <div class="flex-grow mb-4 sm:mb-0">
@@ -442,8 +536,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         <p class="text-sm text-gray-600">${booking.activity}</p>
                         <p class="text-sm text-gray-500 mt-1">${new Date(booking.date).toLocaleDateString('id-ID', {day: 'numeric', month: 'long', year: 'numeric'})} | ${booking.start} - ${booking.end}</p>
                     </div>
-                    <div class="flex-shrink-0">
+                    <div class="flex-shrink-0 flex items-center">
                         <span class="px-3 py-1 text-xs font-semibold rounded-full ${status.class}">${status.text}</span>
+                        ${feedbackButton}
                     </div>
                 </div>
                 `;
@@ -556,10 +651,13 @@ ${diagramSyntax}
         const mostPopularRoomId = Object.keys(roomUsage).length > 0 ? Object.keys(roomUsage).reduce((a, b) => roomUsage[a] > roomUsage[b] ? a : b) : null;
         const mostPopularRoom = mostPopularRoomId ? roomsData.find(r => r.id === parseInt(mostPopularRoomId))?.name : 'N/A';
         
+        const totalRatings = feedbackData.reduce((acc, f) => acc + f.rating, 0);
+        const averageRating = feedbackData.length > 0 ? (totalRatings / feedbackData.length).toFixed(1) : 'N/A';
+        
         const kpiCards = [
+            { title: 'Rating Kepuasan', value: averageRating, icon: 'star', color: 'text-amber-500', show: true },
             { title: 'Tingkat Penggunaan', value: `${occupancyRate}%`, icon: 'arrow-trending-up', color: 'text-blue-600', show: reportRoomFilter !== 'Digital' },
             { title: 'Tingkat Persetujuan', value: `${approvalRate}%`, icon: 'check-badge', color: 'text-green-600', show: true },
-            { title: 'Ruangan Terpopuler', value: mostPopularRoom, icon: 'star', color: 'text-purple-600', show: true }
         ];
 
         const dateFiltersHTML = `<div id="report-date-filters" class="p-1 bg-gray-200 rounded-lg flex space-x-1">
